@@ -7,6 +7,7 @@ from scipy  import signal as sci
 import math
 import detect_beats as detector
 from numpy import median
+import biosppy.signals as ecgdetector
 
 sample_rate=1000;
 w_c=sample_rate*2*math.pi
@@ -25,23 +26,16 @@ nrow,ncol= sig.shape
 b,a =sci.butter(1, [w_l, w_h], 'bandpass', False, 'ba')
 
 
-for col in range(0,ncol):   
-    sig[:,col]=sci.detrend(sig[:,col])
-    sig[:,col]=sci.filtfilt(b, a, sig[:,col])
-   
-pos=detector.detect_beats(sig[:,0],sample_rate) 
+ecgs=detector.FindEcgPeriods(sig[:,0],sample_rate) 
 
-window_size=[]
+r_peak_after=200
+for ecg in ecgs:
+    offset=ecg.R_Peak-r_peak_after
+    plot.plot(ecg.Signal[offset:])
    
-
-for i in range(0,pos.size-1):
-    window_size.append(pos[i+1]-pos[i])
     
-si=median(window_size)
-print window_size
-for i in range(0,len(window_size)):
-    plot.plot(sig[pos[i]-si/2:pos[i]+si/2,0])
 plot.show()
+
 
 
 
